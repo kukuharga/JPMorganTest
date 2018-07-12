@@ -25,32 +25,32 @@ public class SalesMessageListener implements MessageListener {
 			switch (msgType) {
 			case MessageHandler.MSG_TYP_1:
 				System.out.println("Type1 Handling..");
-				System.out.println("====Before====");
-				svc.printProductSales();
+//				System.out.println("====Before====");
+//				svc.printProductSales();
 				price = Double.parseDouble(message.get(MessageHandler.VALUE));
 				svc.addSale(productType, price);
-				System.out.println("====After====");
-				svc.printProductSales();
+//				System.out.println("====After====");
+//				svc.printProductSales();
 				break;
 			case MessageHandler.MSG_TYP_2:
 				System.out.println("Type2 Handling..");
 				price = Double.parseDouble(message.get(MessageHandler.VALUE));
 				int qty = Integer.parseInt(message.get(MessageHandler.QUANTITY));
-				System.out.println("====Before====");
-				svc.printProductSales();
+//				System.out.println("====Before====");
+//				svc.printProductSales();
 				svc.addSale(productType, price, qty);
-				System.out.println("====After====");
-				svc.printProductSales();
+//				System.out.println("====After====");
+//				svc.printProductSales();
 				break;
 			case MessageHandler.MSG_TYP_3:
 				System.out.println("Type3 Handling..");
 				double value = Double.parseDouble(message.get(MessageHandler.VALUE));
 				String operation = message.get(MessageHandler.OPERATION);
-				System.out.println("====Before====");
-				svc.printProductSales();
+//				System.out.println("====Before====");
+//				svc.printProductSales();
 				svc.modifySale(productType, value, operation);
-				System.out.println("====After====");
-				svc.printProductSales();
+//				System.out.println("====After====");
+//				svc.printProductSales();
 				break;
 
 			}
@@ -75,6 +75,7 @@ public class SalesMessageListener implements MessageListener {
 	private void reportAdjustment() throws InterruptedException {
 		System.out.println("====System Paused====");
 		Thread.sleep(20000);
+		svc.printAdjustment();
 	}
 
 }

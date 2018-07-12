@@ -40,4 +40,11 @@ public class SalesAdjustment {
 		this.value = value;
 	}
 
+	@Override
+	public String toString() {
+		return "SalesAdjustment [operation=" + operation + ", value=" + value + "]";
+	}
+	
+	
+
 }

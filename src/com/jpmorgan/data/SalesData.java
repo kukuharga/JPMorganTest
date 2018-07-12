@@ -17,6 +17,10 @@ public class SalesData {
 
 		return sales;
 	}
+	
+	public List<SalesAdjustment> getSalesAdjustments(){
+		return this.salesAdjustments;
+	}
 
 	public List<SalesTrx> getSalesTrx(String productType) {
 		return this.sales.stream().filter(n -> productType.equalsIgnoreCase(n.getProductType())).collect(Collectors.toList());

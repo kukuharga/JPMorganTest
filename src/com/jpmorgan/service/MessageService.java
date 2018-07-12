@@ -3,6 +3,8 @@ package com.jpmorgan.service;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.jpmorgan.data.SalesAdjustment;
 import com.jpmorgan.data.SalesData;
 import com.jpmorgan.data.SalesTrx;
 
@@ -34,7 +36,7 @@ public class MessageService {
 		}
 		
 		salesData.addAdjustment(productType, operation.toLowerCase(), value);
-
+		
 	}
 
 	private double getSalesValue(String productType) {
@@ -61,10 +63,9 @@ public class MessageService {
 	}
 
 	public void printAdjustment() {
-		Map<String, Double> productSales = salesData.getSalesTrxList().stream().collect(Collectors
-				.groupingBy(SalesTrx::getProductType, Collectors.summingDouble(n -> n.getQty() * n.getPrice())));
-
-		System.out.println(productSales);
+		Map<String,List<SalesAdjustment>> mapData = salesData.getSalesAdjustments().stream()
+				.collect(Collectors.groupingBy(SalesAdjustment::getProductType,Collectors.toList()));
+		System.out.println(mapData);
 	}
 
 	private void modifyAdd(String productType, List<SalesTrx> salesTrxList, double value) {
