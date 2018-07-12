@@ -1,10 +1,10 @@
 package com.jpmorgan.service;
 
 import java.util.List;
-
+import java.util.Map;
+import java.util.stream.Collectors;
 import com.jpmorgan.data.SalesData;
 import com.jpmorgan.data.SalesTrx;
-import com.jpmorgan.exception.DataNotFoundException;
 
 public class MessageService {
 	private SalesData salesData = new SalesData();
@@ -17,56 +17,65 @@ public class MessageService {
 		salesData.insertSalesTrx(productType, price, qty);
 	}
 
-	public void modifySale(String productType, double value, String operation) throws DataNotFoundException {
+	public void modifySale(String productType, double value, String operation) throws Exception {
 
-		List<SalesTrx> salesTrxList = salesData.getSalesTrx(productType);
-		if (salesTrxList == null)
-			throw new DataNotFoundException("Product Type " + productType + " not found!");
-		
-		if ("add".equals(operation.toLowerCase())) {
-			modifyAdd(salesTrxList, value);
-		} else if ("substract".equalsIgnoreCase(operation)) {
-			modifyAdd(salesTrxList, value * -1);
-		} else if ("multiply".equalsIgnoreCase(operation)) {
-			modifyMultiply(salesTrxList, value * -1);
+		switch (operation.toLowerCase()) {
+		case "add":
+			modifyAdd(productType, salesData.getSalesTrxList(), value);
+			break;
+		case "subtract":
+			modifyAdd(productType, salesData.getSalesTrxList(), value * -1);
+			break;
+		case "multiply":
+			modifyMultiply(productType, salesData.getSalesTrxList(), value * 1);
+			break;
+		default:
+			throw new Exception("Operation not permitted: "+operation);
 		}
-
 		
+		salesData.addAdjustment(productType, operation.toLowerCase(), value);
 
 	}
 
 	private double getSalesValue(String productType) {
-		double salesVal = 0;
-		List<SalesTrx> salesTrxList = salesData.getSalesTrx(productType);
-		for (SalesTrx trx : salesTrxList) {
-			salesVal += (trx.getPrice() * trx.getQty());
-		}
-		return salesVal;
+		return salesData.getSalesTrxList().stream().filter(n -> productType.equalsIgnoreCase(n.getProductType()))
+				.map(n -> n.getPrice() * n.getQty()).collect(Collectors.summingDouble(m -> m));
 	}
 
 	public void printSalesTrxData(String productType) {
 		List<SalesTrx> salesTrxList = salesData.getSalesTrx(productType);
-		if(salesTrxList == null) {
-			System.out.println("No data found.");
+		if (salesTrxList == null) {
+			System.out.println("===No data found===");
 			return;
 		}
-		for (SalesTrx trx : salesTrxList) {
-			System.out.println(trx);
-		}
-		
-		System.out.println("total|"+getSalesValue(productType));
+
+		salesTrxList.stream().forEach(trx -> System.out.println(trx));
+		System.out.println("total|" + getSalesValue(productType));
 	}
 
-	private void modifyAdd(List<SalesTrx> salesTrxList, double value) {
-		for (SalesTrx trx : salesTrxList) {
-			trx.setPrice(trx.getPrice() + value);
-		}
+	public void printProductSales() {
+		Map<String, Double> productSales = salesData.getSalesTrxList().stream().collect(Collectors
+				.groupingBy(SalesTrx::getProductType, Collectors.summingDouble(n -> n.getQty() * n.getPrice())));
+
+		System.out.println(productSales);
 	}
 
-	private void modifyMultiply(List<SalesTrx> salesTrxList, double value) {
-		for (SalesTrx trx : salesTrxList) {
-			trx.setPrice(trx.getPrice() * value);
-		}
+	public void printAdjustment() {
+		Map<String, Double> productSales = salesData.getSalesTrxList().stream().collect(Collectors
+				.groupingBy(SalesTrx::getProductType, Collectors.summingDouble(n -> n.getQty() * n.getPrice())));
+
+		System.out.println(productSales);
+	}
+
+	private void modifyAdd(String productType, List<SalesTrx> salesTrxList, double value) {
+
+		salesTrxList.stream().filter(n -> productType.equalsIgnoreCase(n.getProductType()))
+				.forEach(trx -> trx.setPrice(trx.getPrice() + value));
+	}
+
+	private void modifyMultiply(String productType, List<SalesTrx> salesTrxList, double value) {
+		salesTrxList.stream().filter(n -> productType.equalsIgnoreCase(n.getProductType()))
+				.forEach(trx -> trx.setPrice(trx.getPrice() * value));
 	}
 
 }

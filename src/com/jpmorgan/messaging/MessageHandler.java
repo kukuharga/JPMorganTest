@@ -21,6 +21,9 @@ public class MessageHandler {
 	public static final String OPERATION = "OPERATION";
 	public static final String QUANTITY = "QTY";
 	public static final String PROCESSED_PATH_NM = "processed";
+	public static final String PAUSE_FLAG = "pause";
+	public static final String REPORT_FLAG = "report";
+	private int msgCounter = 0;
 
 	void addListener(MessageListener listener) {
 		this.listeners.add(listener);
@@ -31,22 +34,26 @@ public class MessageHandler {
 	}
 
 	void fireListener(Map<String, String> message) {
-		for (MessageListener listener : listeners) {
-			listener.onMessage(message);
-		}
+		this.msgCounter += 1;
+		if(this.msgCounter % 10 == 0) message.put(REPORT_FLAG, "TRUE");
+		if(this.msgCounter % 50 == 0) message.put(PAUSE_FLAG, "TRUE");
+		listeners.stream().forEach(n -> n.onMessage(message));
 	}
+	
 
+
+	// Pass File path as the first program argument
 	public static void main(String[] args) {
 		try {
 			if (args.length == 0)
 				throw new Exception("Please provide file path as the first argument!");
 			String csvFile = args[0];
-			
 
 			MessageHandler handler = new MessageHandler();
 			File filePath = handler.getFilePath(csvFile);
 			File processedFilePath = new File(csvFile + File.separator + PROCESSED_PATH_NM);
 			boolean processedPathExist = true;
+
 			if (!processedFilePath.exists()) {
 
 				processedPathExist = processedFilePath.mkdirs();
@@ -75,7 +82,7 @@ public class MessageHandler {
 					}
 
 				}
-				Thread.sleep(100);//Polling frequency
+				Thread.sleep(100);// Polling frequency
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -98,51 +105,56 @@ public class MessageHandler {
 
 	}
 
-	private List<Map<String, String>> constructMessage(File file) {
+	private List<Map<String, String>> constructMessage(File file) throws Exception {
 
-		BufferedReader br = null;
+		//BufferedReader br = null;
 		String line = "";
-		String cvsSplitBy = ",";
+		String csvSplitBy = ",";
 		List<Map<String, String>> msgList = new ArrayList<Map<String, String>>();
 
-		try {
+		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
 
-			br = new BufferedReader(new FileReader(file));
+			// br = new BufferedReader(new FileReader(file));
 			while ((line = br.readLine()) != null) {
 				// use comma as separator
-				String[] message = line.split(cvsSplitBy);
+				String[] message = line.split(csvSplitBy);
 				Map<String, String> mapMessage = new HashMap<String, String>();
-				if (MSG_TYP_1.equalsIgnoreCase(message[0])) {
+
+				switch (message[0]) {
+				case MSG_TYP_1:
 					mapMessage.put(MSG_TYPE, MSG_TYP_1);
 					mapMessage.put(PRODUCT_TYPE, message[1]);
 					mapMessage.put(VALUE, message[2]);
-				} else if (MSG_TYP_2.equalsIgnoreCase(message[0])) {
+					break;
+				case MSG_TYP_2:
 					mapMessage.put(MSG_TYPE, MSG_TYP_2);
 					mapMessage.put(PRODUCT_TYPE, message[1]);
 					mapMessage.put(VALUE, message[2]);
 					mapMessage.put(QUANTITY, message[3]);
-				} else if (MSG_TYP_3.equalsIgnoreCase(message[0])) {
+					break;
+				case MSG_TYP_3:
 					mapMessage.put(MSG_TYPE, MSG_TYP_3);
 					mapMessage.put(PRODUCT_TYPE, message[1]);
 					mapMessage.put(VALUE, message[2]);
 					mapMessage.put(OPERATION, message[3]);
+					break;
+				default:
+					throw new Exception("Message is not recognized!");
 				}
+				
+				
+
 				if (mapMessage.isEmpty() == false)
 					msgList.add(mapMessage);
+				
+				
+				
 			}
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			if (br != null) {
-				try {
-					br.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 		return msgList;
 

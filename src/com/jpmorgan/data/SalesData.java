@@ -1,54 +1,29 @@
 package com.jpmorgan.data;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
+import java.util.stream.Collectors;
 
 public class SalesData {
-//	private Map<String, Double> salesMap = new HashMap<String, Double>();
-	private Map<String,List<SalesTrx>> salesTrxMap = new HashMap<String,List<SalesTrx>>();
-	
-	
-	public void insertSalesTrx(String productType, double price, int quantity) {	
-		List<SalesTrx> sales = salesTrxMap.get(productType);
-		if(sales == null) {
-			 sales = new ArrayList<SalesTrx>();
-			 salesTrxMap.put(productType, sales);
-		}
-		sales.add(new SalesTrx(productType,price,quantity));		
+	List<SalesTrx> sales = new ArrayList<SalesTrx>();
+	List<SalesAdjustment> salesAdjustments = new ArrayList<SalesAdjustment>();
+
+	public void insertSalesTrx(String productType, double price, int quantity) {
+		sales.add(new SalesTrx(productType, price, quantity));
 
 	}
-	
-//	public void insertOrUpdateSales(String productType, double price, int quantity) {
-//		Double oldSalesValue = salesMap.get(productType);
-//		oldSalesValue = (oldSalesValue == null) ? new Double(0) : oldSalesValue;
-//		Double newSalesValue = new Double(price * quantity);
-//		salesMap.put(productType, newSalesValue + oldSalesValue);
-//
-//	}
-	
-	public List<SalesTrx>getSalesTrx(String productCode) {
-		return salesTrxMap.get(productCode);
+
+	public List<SalesTrx> getSalesTrxList() {
+
+		return sales;
 	}
 
-//	public Map<String, Double> getSalesMap() {
-//		return salesMap;
-//	}
-
-//	public void setSalesMap(Map<String, Double> salesMap) {
-//		this.salesMap = salesMap;
-//	}
-
-	public Map<String, List<SalesTrx>> getSalesTrxMap() {
-		return salesTrxMap;
-	}
-
-	public void setSalesTrxMap(Map<String, List<SalesTrx>> salesTrxMap) {
-		this.salesTrxMap = salesTrxMap;
+	public List<SalesTrx> getSalesTrx(String productType) {
+		return this.sales.stream().filter(n -> productType.equalsIgnoreCase(n.getProductType())).collect(Collectors.toList());
 	}
 	
-	
+	public void addAdjustment(String productType,String operationType,double adjustmentValue) {
+		this.salesAdjustments.add(new SalesAdjustment(operationType,productType,adjustmentValue));
+	}
 
 }

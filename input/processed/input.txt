@@ -1,0 +1,4 @@
+type1,apple,5
+type1,orange,6
+type2,apple,5,20
+type3,apple,2,subtract

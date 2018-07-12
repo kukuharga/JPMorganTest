@@ -38,6 +38,12 @@ public class Message {
 		this.messageContent = messageContent;
 	}
 	
+	public static void main(String[] args) {
+		for(int msgCounter=0;msgCounter<100;msgCounter++) {
+		if(msgCounter % 10 == 0) System.out.println("Wow 10: "+msgCounter);
+		if(msgCounter % 50 == 0) System.out.println("Wow 50: "+msgCounter);
+		}
+	}
 	
 	
 	
