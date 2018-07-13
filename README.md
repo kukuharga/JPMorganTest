@@ -4,8 +4,7 @@
 This program takes input CSV input file
 
 How to run the program :
-java -jar JPMorganTest.jar <input file path>
-
+java -jar JPMorganTest.jar [input file path]
 Example :
 java -jar JPMorganTest.jar /Users/kukuhargaditya/Documents/input
 
